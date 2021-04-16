@@ -357,6 +357,18 @@ extern bool luaval_to_fontdefinition(lua_State* L, int lo, FontDefinition* outVa
 extern bool luaval_to_mat4(lua_State* L, int lo, cocos2d::Mat4* outValue , const char* funcName = "");
 
 /**
+ * Get a __Array object value from the given acceptable index of stack.
+ * Because __Array is deprecated, so this function would be not called anymore.
+ */
+extern bool luaval_to_array(lua_State* L,int lo, __Array** outValue, const char* funcName = "");
+
+/**
+ * Get a __Dictionary object value from the given acceptable index of stack.
+ * Because __Dictionary is deprecated, so this function would be not called anymore.
+ */
+extern bool luaval_to_dictionary(lua_State* L,int lo, __Dictionary** outValue, const char* funcName = "");
+
+/**
  * Get a array of Vec2 object from the given acceptable index of stack.
  * If the value at the given acceptable index of stack is a table it returns true, otherwise returns false.
  *
@@ -368,6 +380,12 @@ extern bool luaval_to_mat4(lua_State* L, int lo, cocos2d::Mat4* outValue , const
  * @return Return true if the value at the given acceptable index of stack is a table, otherwise return false.
  */
 extern bool luaval_to_array_of_vec2(lua_State* L,int lo,cocos2d::Vec2 **points, int *numPoints, const char* funcName = "");
+
+/**
+ * Get a __Array object value by the argc numbers of Lua values in the stack.
+ * Because __Array is deprecated, so this function would be not called anymore.
+ */
+extern bool luavals_variadic_to_array(lua_State* L,int argc, __Array** ret);
 
 /**
  * Get a cocos2d::ValueVector object value by the argc numbers of Lua values in the stack.
@@ -452,6 +470,15 @@ extern bool luaval_to_ttfconfig(lua_State* L, int lo, cocos2d::TTFConfig* outVal
 static inline bool luaval_to_point(lua_State* L,int lo,cocos2d::Vec2* outValue, const char* funcName = "")
 {
     return luaval_to_vec2(L, lo, outValue);
+}
+
+CC_DEPRECATED_ATTRIBUTE static inline bool luaval_to_kmMat4(lua_State* L, int lo, cocos2d::Mat4* outValue , const char* funcName = "")
+{
+    return luaval_to_mat4(L, lo, outValue);
+}
+CC_DEPRECATED_ATTRIBUTE static inline bool luaval_to_array_of_Point(lua_State* L,int lo,cocos2d::Vec2 **points, int *numPoints, const char* funcName = "")
+{
+    return luaval_to_array_of_vec2(L, lo, points, numPoints);
 }
 
 /**
@@ -949,6 +976,10 @@ extern void affinetransform_to_luaval(lua_State* L,const AffineTransform& inValu
  */
 extern void fontdefinition_to_luaval(lua_State* L,const FontDefinition& inValue);
 
+extern void array_to_luaval(lua_State* L, __Array* inValue);
+extern void dictionary_to_luaval(lua_State* L, __Dictionary* dict);
+
+
 /**
  * Push a table converted from a cocos2d::Mat4 object into the Lua stack.
  * The format of table as follows: {numberValue1, numberValue2, ..., numberValue16}
@@ -979,6 +1010,12 @@ extern void ttfconfig_to_luaval(lua_State* L, const cocos2d::TTFConfig& config);
 static inline void point_to_luaval(lua_State* L,const cocos2d::Vec2& pt)
 {
     vec2_to_luaval(L, pt);
+}
+
+
+CC_DEPRECATED_ATTRIBUTE static inline void points_to_luaval(lua_State* L,const cocos2d::Vec2* points, int count)
+{
+    vec2_array_to_luaval(L, points, count);
 }
 
 /**

@@ -901,4 +901,194 @@ void LayerRadialGradient::convertColor4B24F(Color4F& outColor, const Color4B& in
     outColor.a = inColor.a / 255.0f;
 }
 
+
+/// MultiplexLayer
+
+LayerMultiplex::LayerMultiplex()
+: _enabledLayer(0)
+{
+}
+
+LayerMultiplex::~LayerMultiplex()
+{
+    for(const auto &layer : _layers) {
+        layer->cleanup();
+    }
+}
+
+LayerMultiplex * LayerMultiplex::create(Layer * layer, ...)
+{
+    va_list args;
+    va_start(args,layer);
+
+    LayerMultiplex * multiplexLayer = new (std::nothrow) LayerMultiplex();
+    if(multiplexLayer && multiplexLayer->initWithLayers(layer, args))
+    {
+        multiplexLayer->autorelease();
+        va_end(args);
+        return multiplexLayer;
+    }
+    va_end(args);
+    CC_SAFE_DELETE(multiplexLayer);
+    return nullptr;
+}
+
+LayerMultiplex * LayerMultiplex::createWithLayer(Layer* layer)
+{
+    return LayerMultiplex::create(layer, nullptr);
+}
+
+LayerMultiplex* LayerMultiplex::create()
+{
+    LayerMultiplex* ret = new (std::nothrow) LayerMultiplex();
+    if (ret && ret->init())
+    {
+        ret->autorelease();
+    }
+    else
+    {
+        CC_SAFE_DELETE(ret);
+    }
+    return ret;
+}
+
+LayerMultiplex* LayerMultiplex::createWithArray(const Vector<Layer*>& arrayOfLayers)
+{
+    LayerMultiplex* ret = new (std::nothrow) LayerMultiplex();
+    if (ret && ret->initWithArray(arrayOfLayers))
+    {
+        ret->autorelease();
+    }
+    else
+    {
+        CC_SAFE_DELETE(ret);
+    }
+    return ret;
+}
+
+void LayerMultiplex::addLayer(Layer* layer)
+{
+#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+    auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+    if (sEngine)
+    {
+        sEngine->retainScriptObject(this, layer);
+    }
+#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+    _layers.pushBack(layer);
+}
+
+bool LayerMultiplex::init()
+{
+    if (Layer::init())
+    {
+        _enabledLayer = 0;
+        return true;
+    }
+    return false;
+}
+
+bool LayerMultiplex::initWithLayers(Layer *layer, va_list params)
+{
+    if (Layer::init())
+    {
+        _layers.reserve(5);
+#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+        auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+        if (sEngine)
+        {
+            sEngine->retainScriptObject(this, layer);
+        }
+#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+        _layers.pushBack(layer);
+
+        Layer *l = va_arg(params,Layer*);
+        while( l ) {
+#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+            if (sEngine)
+            {
+                sEngine->retainScriptObject(this, l);
+            }
+#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+            _layers.pushBack(l);
+            l = va_arg(params,Layer*);
+        }
+
+        _enabledLayer = 0;
+        this->addChild(_layers.at(_enabledLayer));
+        return true;
+    }
+
+    return false;
+}
+
+bool LayerMultiplex::initWithArray(const Vector<Layer*>& arrayOfLayers)
+{
+    if (Layer::init())
+    {
+#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+        auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+        if (sEngine)
+        {
+            for (const auto &layer : arrayOfLayers)
+            {
+                if (layer)
+                {
+                    sEngine->retainScriptObject(this, layer);
+                }
+            }
+        }
+#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+        _layers.reserve(arrayOfLayers.size());
+        _layers.pushBack(arrayOfLayers);
+
+        _enabledLayer = 0;
+        this->addChild(_layers.at(_enabledLayer));
+        return true;
+    }
+    return false;
+}
+
+void LayerMultiplex::switchTo(int n)
+{
+    
+    switchTo(n, true);
+}
+
+void LayerMultiplex::switchTo(int n, bool cleanup)
+{
+    CCASSERT( n < _layers.size(), "Invalid index in MultiplexLayer switchTo message" );
+    
+    this->removeChild(_layers.at(_enabledLayer), cleanup);
+    
+    _enabledLayer = n;
+    
+    this->addChild(_layers.at(n));
+}
+
+void LayerMultiplex::switchToAndReleaseMe(int n)
+{
+    CCASSERT( n < _layers.size(), "Invalid index in MultiplexLayer switchTo message" );
+
+    this->removeChild(_layers.at(_enabledLayer), true);
+#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+    auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+    if (sEngine)
+    {
+        sEngine->releaseScriptObject(this, _layers.at(_enabledLayer));
+    }
+#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+    
+    _layers.replace(_enabledLayer, nullptr);
+
+    _enabledLayer = n;
+
+    this->addChild(_layers.at(n));
+}
+
+std::string LayerMultiplex::getDescription() const
+{
+    return StringUtils::format("<LayerMultiplex | Tag = %d, Layers = %d", _tag, static_cast<int>(_children.size()));
+}
+
 NS_CC_END

@@ -376,6 +376,140 @@ std::string FileUtilsApple::getFullPathForFilenameWithinDirectory(const std::str
     return "";
 }
 
+ValueMap FileUtilsApple::getValueMapFromFile(const std::string& filename) const
+{
+    auto d(FileUtils::getInstance()->getDataFromFile(filename));
+    return getValueMapFromData(reinterpret_cast<char*>(d.getBytes()), static_cast<int>(d.getSize()));
+}
+
+ValueMap FileUtilsApple::getValueMapFromData(const char* filedata, int filesize) const
+{
+    NSData* file = [NSData dataWithBytes:filedata length:filesize];
+    NSPropertyListFormat format;
+    NSError* error;
+    NSDictionary* dict = [NSPropertyListSerialization propertyListWithData:file options:NSPropertyListImmutable format:&format error:&error];
+
+    ValueMap ret;
+
+    if (dict != nil)
+    {
+        for (id key in [dict allKeys])
+        {
+            id value = [dict objectForKey:key];
+            addNSObjectToCCMap(key, value, ret);
+        }
+    }
+    return ret;
+}
+
+bool FileUtilsApple::writeToFile(const ValueMap& dict, const std::string &fullPath) const
+{
+    return writeValueMapToFile(dict, fullPath);
+}
+
+bool FileUtils::writeValueMapToFile(const ValueMap& dict, const std::string& fullPath) const
+{
+    valueMapCompact(const_cast<ValueMap&>(dict));
+    //CCLOG("iOS||Mac Dictionary %d write to file %s", dict->_ID, fullPath.c_str());
+    NSMutableDictionary *nsDict = [NSMutableDictionary dictionary];
+
+    for (auto& iter : dict)
+    {
+        addCCValueToNSDictionary(iter.first, iter.second, nsDict);
+    }
+
+    NSString *file = [NSString stringWithUTF8String:fullPath.c_str()];
+    // do it atomically
+    return [nsDict writeToFile:file atomically:YES];
+}
+
+void FileUtilsApple::valueMapCompact(ValueMap& valueMap) const
+{
+    auto itr = valueMap.begin();
+    while(itr != valueMap.end()){
+        auto vtype = itr->second.getType();
+        switch(vtype){
+            case Value::Type::NONE:{
+                itr = valueMap.erase(itr);
+                continue;
+            }
+                break;
+            case Value::Type::MAP:{
+                valueMapCompact(itr->second.asValueMap());
+            }
+                break;
+            case Value::Type::VECTOR:{
+                valueVectorCompact(itr->second.asValueVector());
+            }
+                break;
+            default:
+                break;
+        }
+        ++itr;
+    }
+}
+
+void FileUtilsApple::valueVectorCompact(ValueVector& valueVector) const
+{
+    auto itr = valueVector.begin();
+    while(itr != valueVector.end()){
+        auto vtype = (*itr).getType();
+        switch(vtype){
+            case Value::Type::NONE:{
+                itr = valueVector.erase(itr);
+                continue;
+            }
+                break;
+            case Value::Type::MAP:{
+                valueMapCompact((*itr).asValueMap());
+            }
+                break;
+            case Value::Type::VECTOR:{
+                valueVectorCompact((*itr).asValueVector());
+            }
+                break;
+            default:
+                break;
+        }
+        ++itr;
+    }
+}
+
+bool FileUtils::writeValueVectorToFile(const ValueVector& vecData, const std::string& fullPath) const
+{
+    NSString* path = [NSString stringWithUTF8String:fullPath.c_str()];
+    NSMutableArray* array = [NSMutableArray array];
+
+    for (const auto &e : vecData)
+    {
+        addCCValueToNSArray(e, array);
+    }
+
+    [array writeToFile:path atomically:YES];
+
+    return true;
+}
+ValueVector FileUtilsApple::getValueVectorFromFile(const std::string& filename) const
+{
+    //    NSString* pPath = [NSString stringWithUTF8String:pFileName];
+    //    NSString* pathExtension= [pPath pathExtension];
+    //    pPath = [pPath stringByDeletingPathExtension];
+    //    pPath = [[NSBundle mainBundle] pathForResource:pPath ofType:pathExtension];
+    //    fixing cannot read data using Array::createWithContentsOfFile
+    std::string fullPath = fullPathForFilename(filename);
+    NSString* path = [NSString stringWithUTF8String:fullPath.c_str()];
+    NSArray* array = [NSArray arrayWithContentsOfFile:path];
+
+    ValueVector ret;
+
+    for (id value in array)
+    {
+        addNSObjectToCCVector(value, ret);
+    }
+
+    return ret;
+}
+
 bool FileUtilsApple::createDirectory(const std::string& path) const
 {
     CCASSERT(!path.empty(), "Invalid path");

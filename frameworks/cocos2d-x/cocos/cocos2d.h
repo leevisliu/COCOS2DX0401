@@ -120,6 +120,8 @@ THE SOFTWARE.
 #include "2d/CCLabel.h"
 #include "2d/CCLabelAtlas.h"
 #include "2d/CCLayer.h"
+#include "2d/CCMenu.h"
+#include "2d/CCMenuItem.h"
 #include "2d/CCMotionStreak.h"
 #include "2d/CCNode.h"
 #include "2d/CCNodeGrid.h"
@@ -238,6 +240,9 @@ THE SOFTWARE.
 #include "2d/CCTMXObjectGroup.h"
 #include "2d/CCTMXTiledMap.h"
 #include "2d/CCTMXXMLParser.h"
+#include "2d/CCTileMapAtlas.h"
+#include "2d/CCFastTMXLayer.h"
+#include "2d/CCFastTMXTiledMap.h"
 
 // component
 #include "2d/CCComponent.h"

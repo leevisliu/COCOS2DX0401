@@ -31,6 +31,8 @@ extern "C" {
 #include "lua.h"
 }
 
+#include "scripting/deprecated/CCArray.h"
+
 #include "scripting/lua-bindings/manual/CCLuaValue.h"
 
 /**
@@ -270,6 +272,19 @@ public:
     /**
      * Execute the lua function corresponding to the handler by the numArgs variables passed.
      * By calling this function, the number of return value is numResults(may be > 1).
+     * All the return values are stored in the resultArray.
+     *
+     * @param handler the index count corresponding to the lua function.
+     * @param numArgs the number of variables.
+     * @param numResults the number of return value.
+     * @param resultArray a array used to store the return value.
+     * @return 0 if it happen error or it hasn't return value, otherwise return 1.
+     */
+    virtual int executeFunctionReturnArray(int handler,int numArgs,int numResults,__Array& resultArray);
+    
+    /**
+     * Execute the lua function corresponding to the handler by the numArgs variables passed.
+     * By calling this function, the number of return value is numResults(may be > 1).
      * All the return values are used in the callback func.
      *
      * @param handler the index count corresponding to the lua function.
@@ -286,6 +301,21 @@ public:
      * @return return true if current _callFromLua of LuaStack is not equal to 0 otherwise return false.
      */
     virtual bool handleAssert(const char *msg);
+    
+    /**
+     * Set the key and sign for xxtea encryption algorithm.
+     *
+     * @param key a string pointer
+     * @param keyLen the length of key
+     * @param sign a string sign
+     * @param signLen the length of sign
+     */
+    virtual void setXXTEAKeyAndSign(const char *key, int keyLen, const char *sign, int signLen);
+    
+    /**
+     * free the key and sign for xxtea encryption algorithm.
+     */
+    virtual void cleanupXXTEAKeyAndSign();
     
     /**
      * Loads a buffer as a Lua chunk.This function uses lua_load to load the Lua chunk in the buffer pointed to by chunk with size chunkSize.
@@ -318,6 +348,11 @@ protected:
     LuaStack()
     : _state(nullptr)
     , _callFromLua(0)
+    , _xxteaEnabled(false)
+    , _xxteaKey(nullptr)
+    , _xxteaKeyLen(0)
+    , _xxteaSign(nullptr)
+    , _xxteaSignLen(0)
     {
     }
     
@@ -326,6 +361,11 @@ protected:
     
     lua_State *_state;
     int _callFromLua;
+    bool  _xxteaEnabled;
+    char* _xxteaKey;
+    int   _xxteaKeyLen;
+    char* _xxteaSign;
+    int   _xxteaSignLen;
 };
 
 NS_CC_END

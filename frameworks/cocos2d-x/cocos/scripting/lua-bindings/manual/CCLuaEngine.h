@@ -37,6 +37,7 @@ extern "C" {
 #include "scripting/lua-bindings/manual/CCLuaValue.h"
 #include "scripting/lua-bindings/manual/cocos2d/LuaScriptHandlerMgr.h"
 #include "scripting/lua-bindings/manual/Lua-BindingsExport.h"
+#include "scripting/deprecated/CCNotificationCenter.h"
 
 /**
  * @addtogroup lua
@@ -60,6 +61,12 @@ public:
      * @return the instance of LuaEngine.
      */
     static LuaEngine* getInstance(void);
+    /**
+     * Get defaultEngine of LuaEngine, it was deprecated.
+     *
+     * @return the instance of LuaEngine.
+     */
+    CC_DEPRECATED_ATTRIBUTE static LuaEngine* defaultEngine(void) { return LuaEngine::getInstance(); }
     
     /** 
      * Destructor of LuaEngine.
@@ -157,7 +164,15 @@ public:
      * @return The integer value returned from the script function.
      */
     virtual int executeGlobalFunction(const char* functionName) override;
+    virtual int executeNodeEvent(Node* pNode, int nAction);
+    virtual int executeMenuItemEvent(MenuItem* pMenuItem);
+    virtual int executeNotificationEvent(__NotificationCenter* pNotificationCenter, const char* pszName);
+    virtual int executeCallFuncActionEvent(CallFunc* pAction, Ref* pTarget = NULL);
     virtual int executeSchedule(int nHandler, float dt, Node* pNode = NULL);
+    virtual int executeLayerTouchesEvent(Layer* pLayer, int eventType, __Set *pTouches);
+    virtual int executeLayerTouchEvent(Layer* pLayer, int eventType, Touch *pTouch);
+    virtual int executeLayerKeypadEvent(Layer* pLayer, int eventType);
+    virtual int executeAccelerometerEvent(Layer* pLayer, Acceleration* pAccelerationValue);
     virtual int executeEvent(int nHandler, const char* pEventName, Ref* pEventSource = NULL, const char* pEventSourceClassName = NULL);
     /**
      * Handle the assert message.
@@ -208,15 +223,20 @@ private:
     }
     bool init(void);
     int handleNodeEvent(void* data);
+    int handleMenuClickedEvent(void* data);
     int handleCallFuncActionEvent(void* data);
     int handleScheduler(void* data);
     int handleKeypadEvent(void* data);
     int handleAccelerometerEvent(void* data);
     int handleCommonEvent(void* data);
+    int handleTouchEvent(void* data);
+    int handleTouchesEvent(void* data);
     int handlerControlEvent(void* data);
     int handleEvenCustom(void* data);
+    int handleAssetsManagerEvent(ScriptHandlerMgr::HandlerType type,void* data);
     int handleTableViewEvent(ScriptHandlerMgr::HandlerType type,void* data);
     int handleTableViewEvent(ScriptHandlerMgr::HandlerType type,void* data, int numResults, const std::function<void(lua_State*,int)>& func);
+    int handleArmatureWrapper(ScriptHandlerMgr::HandlerType type,void* data);
     int handleEventAcc(void* data);
     int handleEventKeyboard(ScriptHandlerMgr::HandlerType type,void* data);
     int handleEventTouch(ScriptHandlerMgr::HandlerType type, void* data);

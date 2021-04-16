@@ -34,12 +34,15 @@ set(COCOS_2D_HEADER
     2d/CCProtectedNode.h
     2d/CCTextFieldTTF.h
     2d/CCAnimationCache.h
+    2d/CCFastTMXLayer.h
     2d/CCFontAtlasCache.h
     2d/CCFont.h
     2d/CCParticleSystemQuad.h
     2d/CCActionGrid3D.h
     2d/CCCameraBackgroundBrush.h
+    2d/CCFastTMXTiledMap.h
     2d/CCLabelTextFormatter.h
+    2d/CCMenuItem.h
     2d/CCFontFNT.h
     2d/CCSpriteBatchNode.h
     2d/CCTransitionProgress.h
@@ -54,9 +57,11 @@ set(COCOS_2D_HEADER
     2d/CCFontCharMap.h
     2d/CCParticleSystem.h
     2d/CCProgressTimer.h
+    2d/CCTileMapAtlas.h
     2d/CCActionTiledGrid.h
     2d/CCActionManager.h
     2d/CCMotionStreak.h
+    2d/CCMenu.h
     2d/CCDrawNode.h
     2d/CCTMXLayer.h
     2d/CCCamera.h
@@ -88,6 +93,8 @@ set(COCOS_2D_SRC
     2d/CCComponentContainer.cpp
     2d/CCComponent.cpp
     2d/CCDrawNode.cpp
+    2d/CCFastTMXLayer.cpp
+    2d/CCFastTMXTiledMap.cpp
     2d/CCFontAtlasCache.cpp
     2d/CCFontAtlas.cpp
     2d/CCFontCharMap.cpp
@@ -100,6 +107,8 @@ set(COCOS_2D_SRC
     2d/CCLabelTextFormatter.cpp
     2d/CCLayer.cpp
     2d/CCLight.cpp
+    2d/CCMenu.cpp
+    2d/CCMenuItem.cpp
     2d/CCMotionStreak.cpp
     2d/CCNode.cpp
     2d/CCNodeGrid.cpp
@@ -118,6 +127,7 @@ set(COCOS_2D_SRC
     2d/CCSpriteFrame.cpp
     2d/CCAutoPolygon.cpp
     2d/CCTextFieldTTF.cpp
+    2d/CCTileMapAtlas.cpp
     2d/CCTMXLayer.cpp
     2d/CCTMXObjectGroup.cpp
     2d/CCTMXTiledMap.cpp

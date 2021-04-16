@@ -56,7 +56,8 @@ class Action;
 
 enum ccScriptType {
     kScriptTypeNone = 0,
-    kScriptTypeLua
+    kScriptTypeLua,
+    kScriptTypeJavascript
 };
 
 /**
@@ -294,6 +295,48 @@ struct BasicScriptData
      */
     BasicScriptData(void* inObject,void* inValue = nullptr)
     : nativeObject(inObject),value(inValue)
+    {
+    }
+};
+
+/**
+ * For Lua, Wrapper the script data that should be used to find the handler corresponding to the Lua function by the nativeobject pointer and store the value pointer which would be converted concretely by the different events,then the converted data would be passed into the Lua stack.
+ * @js NA
+ */
+struct ActionObjectScriptData
+{
+    /**
+     * For Lua, nativeobject is used to get handler corresponding to the Lua function.
+     *
+     * @js NA
+     * @lua NA
+     */
+    void* nativeObject;
+    
+    /**
+     * A pointer point to the value data which event action
+     *
+     * @js NA
+     * @lua NA
+     */
+    int* eventType;
+    
+    /**
+     * A pointer point to the value data which would be converted by different events.
+     *
+     * @js NA
+     * @lua NA
+     */
+    void* param;
+    
+    /**
+     * Constructor of BasicScriptData.
+     *
+     * @js NA
+     * @lua NA
+     */
+    ActionObjectScriptData(void* inObject,int* inValue = nullptr, void* inParam = nullptr)
+    : nativeObject(inObject),eventType(inValue), param(inParam)
     {
     }
 };
@@ -826,6 +869,27 @@ public:
      * @js NA
      */
     static void destroyInstance();
+    /**
+     *
+     *
+     * @lua NA
+     * @js NA
+     */
+    static bool sendActionEventToJS(Action* actionObject, int eventType, void* param);
+    /**
+     *
+     *
+     * @lua NA
+     * @js NA
+     */
+    static bool sendNodeEventToJS(Node* node, int action);
+    /**
+     *
+     *
+     * @lua NA
+     * @js NA
+     */
+    static bool sendNodeEventToJSExtended(Node* node, int action);
     /**
      * Call the Lua function when the event of node is triggered.
      * 

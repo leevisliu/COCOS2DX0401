@@ -515,6 +515,109 @@ private:
     backend::UniformLocation _expandLocation;
 };
 
+
+/** @class LayerMultiplex
+ * @brief MultipleLayer is a Layer with the ability to multiplex it's children.
+Features:
+- It supports one or more children
+- Only one children will be active a time
+*/
+class CC_DLL LayerMultiplex : public Layer
+{
+public:
+    /** Creates and initializes a LayerMultiplex object.
+     * @lua NA
+     * 
+     * @return An autoreleased LayerMultiplex object.
+     */
+    static LayerMultiplex* create();
+
+    /** Creates a LayerMultiplex with an array of layers.
+     @since v2.1
+     * @js NA
+     *
+     * @param arrayOfLayers An array of layers.
+     * @return An autoreleased LayerMultiplex object.
+     */
+    static LayerMultiplex* createWithArray(const Vector<Layer*>& arrayOfLayers);
+
+    /** Creates a LayerMultiplex with one or more layers using a variable argument list.
+     * @code
+     * When this function bound to lua or js,the input params are changed.
+     * In js:var create(...)
+     * In lua:local create(...)
+     * @endcode
+     */
+    static LayerMultiplex * create(Layer* layer, ... );
+
+    /** Creates a LayerMultiplex with one layer.
+     * Lua script can not init with undetermined number of variables
+     * so add these functions to be used with lua.
+     * @js NA
+     * @lua NA
+     *
+     * @param layer A certain layer.
+     * @return An autoreleased LayerMultiplex object.
+     */
+    static LayerMultiplex * createWithLayer(Layer* layer);
+
+
+    /** Add a certain layer to LayerMultiplex.
+     *
+     * @param layer A layer need to be added to the LayerMultiplex.
+     */
+    void addLayer(Layer* layer);
+
+    /** Switches to a certain layer indexed by n.
+     The current (old) layer will be removed from it's parent with 'cleanup=true'.
+     *
+     * @param n The layer indexed by n will display.
+     */
+    void switchTo(int n);
+    /** The same as switchTo(int), but has a parameter to set if need to clean up child.
+     */
+    void switchTo(int n, bool cleanup);
+    /** release the current layer and switches to another layer indexed by n.
+    The current (old) layer will be removed from it's parent with 'cleanup=true'.
+     *
+     * @param n The layer indexed by n will display.
+     */
+    void switchToAndReleaseMe(int n);
+
+    virtual std::string getDescription() const override;
+    
+CC_CONSTRUCTOR_ACCESS:
+    /**
+     * @js ctor
+     */
+    LayerMultiplex();
+    /**
+     * @js NA
+     * @lua NA
+     */
+    virtual ~LayerMultiplex();
+    
+    virtual bool init() override;
+    /** initializes a MultiplexLayer with one or more layers using a variable argument list.
+     * @js NA
+     * @lua NA
+     */
+    bool initWithLayers(Layer* layer, va_list params);
+    
+    /** initializes a MultiplexLayer with an array of layers
+     @since v2.1
+     */
+    bool initWithArray(const Vector<Layer*>& arrayOfLayers);
+
+protected:
+    unsigned int _enabledLayer;
+    Vector<Layer*>    _layers;
+
+private:
+    CC_DISALLOW_COPY_AND_ASSIGN(LayerMultiplex);
+};
+
+
 // end of _2d group
 /// @}
 

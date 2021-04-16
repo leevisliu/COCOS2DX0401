@@ -33,6 +33,8 @@
 #include "base/CCDirector.h"
 #include "base/CCScheduler.h"
 #include "luasocket/socket.h"
+#include "scripting/lua-bindings/manual/network/lua_xml_http_request.h"
+#include "scripting/lua-bindings/manual/network/lua_downloader.h"
 
 static int tolua_Network_isLocalWiFiAvailable(lua_State* tolua_S)
 {
@@ -237,6 +239,8 @@ int register_network_module(lua_State* L)
         register_http_manual(L);
         register_AsyncTCP_manual(L);
         register_network_manual(L);
+		register_xml_http_request(L);
+        register_downloader(L);
     }
     lua_pop(L, 1);
 
